@@ -25,4 +25,7 @@ To play **Space Wars**, follow these steps:
 # 🎮Controls
 TODO
 
-Let the battle for space dominance begin! 🛸
+# 🖼️Screenshots
+![Screenshot_1](screenshots/preview_1.png)
+
+> Let the battle for space dominance begin! 🛸
