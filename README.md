@@ -10,7 +10,7 @@ To play **Space Wars**, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/space-wars.git
+   git clone https://github.com/LuanContarin/space-wars-game.git
    cd space-wars
    ```
 2. **Install dependencies**: Make sure you have Python and pygame installed. You can install pygame with:
