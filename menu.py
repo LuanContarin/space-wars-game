@@ -31,9 +31,8 @@ def main_menu(SCREEN):
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                #TODO
-                # if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                #     play_game(SCREEN)
+                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    play_game(SCREEN)
                 if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                     options_menu(SCREEN)
                 if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
