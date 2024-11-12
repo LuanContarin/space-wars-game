@@ -19,8 +19,14 @@ def play_game(SCREEN):
     pos_player_x = 0
     pos_player_y = 0
 
+    teclaUP = False
+    teclaDW = False
+
+    acc_y = 0
+
     while True:
 
+        #Renderização dos itens na tela
         i = 0
         while(i < 1200): 
             SCREEN.blit(bg, (bg.get_width()*i 
@@ -34,20 +40,45 @@ def play_game(SCREEN):
 
         SCREEN.blit(playerImg,(400,pos_player_y))
 
+        acc_y *= 0.999
+
         for event in pygame.event.get():
           
             if event.type == pygame.QUIT:
                 pygame.quit()
 
             if event.type == pygame.KEYDOWN:
-                if (event.key == pygame.K_UP or event.key == pygame.K_w) and pos_player_y > 1:
-                    pos_player_y -=40 
+                if (event.key == pygame.K_UP or event.key == pygame.K_w):
+                    teclaUP = True
+                     
+                if (event.key == pygame.K_DOWN or event.key == pygame.K_s):
+                    teclaDW = True 
 
-                if (event.key == pygame.K_DOWN or event.key == pygame.K_s) and pos_player_y < SCREEN.get_height():
-                    pos_player_y +=40
+            if event.type == pygame.KEYUP:
+                if (event.key == pygame.K_UP or event.key == pygame.K_w):
+                    teclaUP = False
+                     
+                if (event.key == pygame.K_DOWN or event.key == pygame.K_s):
+                    teclaDW = False            
 
-        player_rect.y = pos_player_y
-        player_rect.x = pos_player_x            
+        if pos_player_y < 1:    
+            acc_y = 0
+            dy = 0
 
+        if pos_player_y > SCREEN.get_height() - 100:    
+            acc_y  = 0
+            dy = 0
+
+        dy = 0
+
+        if teclaUP:
+            dy += -0.001
+
+        if teclaDW:
+            dy += 0.001
+
+        acc_y += dy
+      
+        pos_player_y += acc_y            
 
         pygame.display.update()
