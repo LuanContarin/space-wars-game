@@ -35,15 +35,29 @@ def play_game(SCREEN):
     background_speed = 9
     player_speed = 8
 
+    # Player health properties
+    player_health = 100
+    max_health = 100
+
     # Bullet properties
-    bullet_speed = 10
-    bullet_cooldown = 300 # Time in milliseconds between bullets
+    bullet_speed = 11
+    bullet_cooldown = 300  # Time in milliseconds between bullets
     last_bullet_time = 0  # Tracks the time when the last bullet was fired
     bullets = []  # List to track bullets
 
     # Enemy properties
     enemy_speed = 3
     enemies = []  # List to track enemies
+
+    # Bullet properties for enemies
+    enemy_bullet_speed = 10
+    enemy_bullet_cooldown = 700  
+    last_enemy_bullet_time = 0
+    enemy_bullets = []  # List to track enemy bullets
+
+    # Score properties
+    score = 0
+    font = pygame.font.Font(None, 36)  # Font for displaying the score
 
     clock = pygame.time.Clock()
     while True:
@@ -92,17 +106,74 @@ def play_game(SCREEN):
         # Update bullet positions
         bullets = [(x + bullet_speed, y) for x, y in bullets if x < SCREEN.get_width()]
 
+        # Enemy shooting logic
+        if current_time - last_enemy_bullet_time > enemy_bullet_cooldown:
+            for enemy_x, enemy_y, enemy in enemies:
+                # Spawn a bullet at the center-left of the enemy
+                bullet_x = enemy_x - bullet_width
+                bullet_y = enemy_y + enemy.get_height() // 2 - bullet_height // 2
+                enemy_bullets.append((bullet_x, bullet_y))
+            last_enemy_bullet_time = current_time
+
+        # Update enemy bullet positions
+        enemy_bullets = [(x - enemy_bullet_speed, y) for x, y in enemy_bullets if x > -bullet_width]
+
         # Update enemy positions (move enemies from right to left)
         enemies = [(x - enemy_speed, y, img) for x, y, img in enemies if x > -img.get_width()]
 
-        # Randomly spawn enemies at the right edge every 1000ms (1 second)
-        if random.randint(1, 60) == 1:  # Random chance per frame (about 1 in 60)
-            enemy = get_random_enemy()  # Get a random enemy image
+        # Randomly spawn enemies at the right edge
+        if random.randint(1, 60) == 1:
+            enemy = get_random_enemy()
             enemy_y = random.randint(0, SCREEN.get_height() - enemy.get_height())
-            enemies.append((SCREEN.get_width(), enemy_y, enemy))  # Spawn enemy at the right side
+            enemies.append((SCREEN.get_width(), enemy_y, enemy))
+
+        # Check collisions between player's bullets and enemies
+        bullets_to_remove = []
+        enemies_to_remove = []
+        for bullet_x, bullet_y in bullets:
+            for i, (enemy_x, enemy_y, enemy) in enumerate(enemies):
+                if (
+                    bullet_x < enemy_x + enemy.get_width() and
+                    bullet_x + bullet_width > enemy_x and
+                    bullet_y < enemy_y + enemy.get_height() and
+                    bullet_y + bullet_height > enemy_y
+                ):
+                    bullets_to_remove.append((bullet_x, bullet_y))
+                    enemies_to_remove.append(i)
+                    score += 10  # Add 10 points for each destroyed enemy
+
+        # Remove collided bullets and enemies
+        bullets = [b for b in bullets if b not in bullets_to_remove]
+        enemies = [e for i, e in enumerate(enemies) if i not in enemies_to_remove]
+
+        # Check collisions between enemy bullets and the player
+        for bullet_x, bullet_y in enemy_bullets:
+            if (
+                bullet_x < player_x + player_width and
+                bullet_x + bullet_width > player_x and
+                bullet_y < player_y + player_height and
+                bullet_y + bullet_height > player_y
+            ):
+                player_health -= 10  # Reduce player health
+                enemy_bullets.remove((bullet_x, bullet_y))  # Remove the bullet
+
+        # Draw the health bar
+        health_bar_width = 200
+        health_bar_height = 20
+        health_ratio = player_health / max_health
+        pygame.draw.rect(SCREEN, (255, 0, 0), (10, 10, health_bar_width, health_bar_height))  # Background
+        pygame.draw.rect(SCREEN, (0, 255, 0), (10, 10, health_bar_width * health_ratio, health_bar_height))  # Current health
+
+        # Draw the score on the screen
+        score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+        SCREEN.blit(score_text, (10, 40))
 
         # Draw the bullets on the screen
         for bullet_x, bullet_y in bullets:
+            SCREEN.blit(bullet, (bullet_x, bullet_y))
+
+        # Draw the enemy bullets on the screen
+        for bullet_x, bullet_y in enemy_bullets:
             SCREEN.blit(bullet, (bullet_x, bullet_y))
 
         # Draw the enemies on the screen
