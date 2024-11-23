@@ -4,6 +4,14 @@ from components.button import Button
 from shared.helpers import get_font
 
 def main_menu(SCREEN):
+
+    pygame.mixer.init()
+
+    pygame.mixer.music.load('./assets/sounds/cantina-band.mp3')
+
+    pygame.mixer.music.play(loops=-1, start=0.0)
+    pygame.mixer.music.set_volume(0.5)
+
     pygame.display.set_caption("Main Menu")
 
     # define background screen

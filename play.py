@@ -1,9 +1,20 @@
 import pygame
 import random
+# from gameover import game_over
 from components.button import Button
 from shared.helpers import get_font, get_random_enemy
 
 def play_game(SCREEN):
+
+    pygame.mixer.init()
+
+    pygame.mixer.music.load('./assets/sounds/bg.mp3')
+
+    pygame.mixer.music.play(loops=-1, start=0.0)
+    pygame.mixer.music.set_volume(0.5)
+
+    tfsound = pygame.mixer.Sound('./assets/sounds/tie-fighter.mp3')
+
     pygame.display.set_caption("Space Wars")
 
     # Fill the screen with black (the background color)
@@ -26,10 +37,14 @@ def play_game(SCREEN):
     player_x = SCREEN.get_width() // 2 - player_width // 2
     player_y = SCREEN.get_height() // 2 - player_height // 2
 
+
     # Load bullet image
-    bullet = pygame.image.load("./assets/images/red_laser.png").convert_alpha()
-    bullet_width = bullet.get_width()
-    bullet_height = bullet.get_height()
+    bullet_red = pygame.image.load("./assets/images/red_laser.png").convert_alpha()
+    bullet_green = pygame.image.load("./assets/images/green_laser.png").convert_alpha()
+    bullet_width = bullet_red.get_width()
+    bullet_width = bullet_green.get_width()
+    bullet_height = bullet_red.get_height()
+    bullet_height = bullet_green.get_height()
 
     # Defining the movement speeds
     background_speed = 9
@@ -94,14 +109,21 @@ def play_game(SCREEN):
         # Prevent the player from moving out of bounds
         player_x = max(0, min(SCREEN.get_width() - player_width, player_x))
         player_y = max(0, min(SCREEN.get_height() - player_height, player_y))
+            
+        sound2 = pygame.mixer.Sound('./assets/sounds/shot2.mp3')
+        sound1 = pygame.mixer.Sound('./assets/sounds/shot1.mp3')
+        sound3 = pygame.mixer.Sound('./assets/sounds/shot3.mp3')
 
         # Check for continuous shooting with cooldown
         if keys[pygame.K_SPACE] and current_time - last_bullet_time > bullet_cooldown:
+            sound = random.choice([sound1, sound2, sound3])
+            sound.play()
             # Spawn a bullet at the center-right of the player
             bullet_x = player_x + player_width
             bullet_y = player_y + player_height // 2 - bullet_height // 2
             bullets.append((bullet_x, bullet_y))
             last_bullet_time = current_time  # Update the last bullet time
+
 
         # Update bullet positions
         bullets = [(x + bullet_speed, y) for x, y in bullets if x < SCREEN.get_width()]
@@ -146,6 +168,7 @@ def play_game(SCREEN):
         bullets = [b for b in bullets if b not in bullets_to_remove]
         enemies = [e for i, e in enumerate(enemies) if i not in enemies_to_remove]
 
+
         # Check collisions between enemy bullets and the player
         for bullet_x, bullet_y in enemy_bullets:
             if (
@@ -170,11 +193,11 @@ def play_game(SCREEN):
 
         # Draw the bullets on the screen
         for bullet_x, bullet_y in bullets:
-            SCREEN.blit(bullet, (bullet_x, bullet_y))
+            SCREEN.blit(bullet_green, (bullet_x, bullet_y))
 
         # Draw the enemy bullets on the screen
         for bullet_x, bullet_y in enemy_bullets:
-            SCREEN.blit(bullet, (bullet_x, bullet_y))
+            SCREEN.blit(bullet_red, (bullet_x, bullet_y))
 
         # Draw the enemies on the screen
         for enemy_x, enemy_y, enemy in enemies:
