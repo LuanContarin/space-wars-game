@@ -1,7 +1,8 @@
 import pygame
 from menu import main_menu
+from gameover import game_over
 
-DEFAULT_WIDTH = 1280
+DEFAULT_WIDTH = 1280  
 DEFAULT_HEIGHT = 720
 
 # pygame setup

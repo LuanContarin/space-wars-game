@@ -1,6 +1,6 @@
 import pygame
 import random
-# from gameover import game_over
+from gameover import game_over
 from components.button import Button
 from shared.helpers import get_font, get_random_enemy
 
@@ -113,6 +113,7 @@ def play_game(SCREEN):
         sound2 = pygame.mixer.Sound('./assets/sounds/shot2.mp3')
         sound1 = pygame.mixer.Sound('./assets/sounds/shot1.mp3')
         sound3 = pygame.mixer.Sound('./assets/sounds/shot3.mp3')
+        # sound4 = pygame.mixer.Sound('./assets/sounds/explosion-sound1.mp3')
 
         # Check for continuous shooting with cooldown
         if keys[pygame.K_SPACE] and current_time - last_bullet_time > bullet_cooldown:
@@ -163,6 +164,8 @@ def play_game(SCREEN):
                     bullets_to_remove.append((bullet_x, bullet_y))
                     enemies_to_remove.append(i)
                     score += 10  # Add 10 points for each destroyed enemy
+                    expsound = pygame.mixer.Sound('./assets/sounds/explosion-sound.mp3')
+                    expsound.play()
 
         # Remove collided bullets and enemies
         bullets = [b for b in bullets if b not in bullets_to_remove]
@@ -179,17 +182,23 @@ def play_game(SCREEN):
             ):
                 player_health -= 10  # Reduce player health
                 enemy_bullets.remove((bullet_x, bullet_y))  # Remove the bullet
+            # Check if player's health is 0 or below
+                if (player_health <= 0):
+                    game_over(SCREEN) 
 
         # Draw the health bar
-        health_bar_width = 200
+        x = 10
+        y = 10
+        health_bar_width = 300
         health_bar_height = 20
         health_ratio = player_health / max_health
-        pygame.draw.rect(SCREEN, (255, 0, 0), (10, 10, health_bar_width, health_bar_height))  # Background
-        pygame.draw.rect(SCREEN, (0, 255, 0), (10, 10, health_bar_width * health_ratio, health_bar_height))  # Current health
+        pygame.draw.rect(SCREEN, (0, 0, 0), (x, y, health_bar_width, health_bar_height))  # Background
+        pygame.draw.rect(SCREEN, (190, 190, 190), (x - 2, y -2, health_bar_width + 4, health_bar_height + 4), 2) # Stroke
+        pygame.draw.rect(SCREEN, (0, 255, 0), (x, y, health_bar_width * health_ratio, health_bar_height))  # Current health
 
         # Draw the score on the screen
-        score_text = font.render(f"Score: {score}", True, (255, 255, 255))
-        SCREEN.blit(score_text, (10, 40))
+        score_text = get_font(18).render(f"score: {score}", True, (255, 255, 255))
+        SCREEN.blit(score_text, (10, 35))
 
         # Draw the bullets on the screen
         for bullet_x, bullet_y in bullets:
