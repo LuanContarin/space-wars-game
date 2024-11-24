@@ -23,9 +23,15 @@ To play **Space Wars**, follow these steps:
     ```
 
 # 🎮Controls
-TODO
+- **W**: Move up
+- **A**: Move down
+- **S**: Move left
+- **D**: Move right
+- **SPACEBAR**: Shoot (hold for continuous fire with cooldown)
 
 # 🖼️Screenshots
 ![Screenshot_1](screenshots/preview_1.png)
+![Screenshot_2](screenshots/preview_2.png)
+![Screenshot_3](screenshots/preview_3.png)
 
 > Let the battle for space dominance begin! 🛸

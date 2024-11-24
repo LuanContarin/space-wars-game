@@ -37,6 +37,10 @@ def play_game(SCREEN):
     player_x = SCREEN.get_width() // 2 - player_width // 2
     player_y = SCREEN.get_height() // 2 - player_height // 2
 
+    # Load explosion image and sound
+    explosion_image = pygame.transform.scale(pygame.image.load("./assets/images/explosion.png").convert_alpha(), (75, 75))
+    explosion_sound = pygame.mixer.Sound("./assets/sounds/explosion-sound.mp3")
+    explosions = []
 
     # Load bullet image
     bullet_red = pygame.image.load("./assets/images/red_laser.png").convert_alpha()
@@ -66,8 +70,8 @@ def play_game(SCREEN):
 
     # Bullet properties for enemies
     enemy_bullet_speed = 10
-    enemy_bullet_cooldown = 700  
     last_enemy_bullet_time = 0
+    enemy_shoot_timers = {} # Dictionary to track each enemy's shooting timer and cooldown
     enemy_bullets = []  # List to track enemy bullets
 
     # Score properties
@@ -110,10 +114,12 @@ def play_game(SCREEN):
         player_x = max(0, min(SCREEN.get_width() - player_width, player_x))
         player_y = max(0, min(SCREEN.get_height() - player_height, player_y))
             
-        sound2 = pygame.mixer.Sound('./assets/sounds/shot2.mp3')
         sound1 = pygame.mixer.Sound('./assets/sounds/shot1.mp3')
+        sound1.set_volume(0.3)
+        sound2 = pygame.mixer.Sound('./assets/sounds/shot2.mp3')
+        sound2.set_volume(0.3)
         sound3 = pygame.mixer.Sound('./assets/sounds/shot3.mp3')
-        # sound4 = pygame.mixer.Sound('./assets/sounds/explosion-sound1.mp3')
+        sound3.set_volume(0.3)
 
         # Check for continuous shooting with cooldown
         if keys[pygame.K_SPACE] and current_time - last_bullet_time > bullet_cooldown:
@@ -125,18 +131,33 @@ def play_game(SCREEN):
             bullets.append((bullet_x, bullet_y))
             last_bullet_time = current_time  # Update the last bullet time
 
-
         # Update bullet positions
         bullets = [(x + bullet_speed, y) for x, y in bullets if x < SCREEN.get_width()]
 
         # Enemy shooting logic
-        if current_time - last_enemy_bullet_time > enemy_bullet_cooldown:
-            for enemy_x, enemy_y, enemy in enemies:
+        for idx, (enemy_x, enemy_y, enemy) in enumerate(enemies):
+            # Initialize shooting timer and cooldown if not already set
+            if idx not in enemy_shoot_timers:
+                enemy_shoot_timers[idx] = {
+                    "last_shot": pygame.time.get_ticks(),
+                    "cooldown": random.randint(500, 1500)  # Random cooldown between 500ms and 1500ms
+                }
+
+            # Get the current time and the enemy's shooting data
+            current_time = pygame.time.get_ticks()
+            last_shot = enemy_shoot_timers[idx]["last_shot"]
+            cooldown = enemy_shoot_timers[idx]["cooldown"]
+
+            # Check if the enemy can shoot
+            if current_time - last_shot >= cooldown:
                 # Spawn a bullet at the center-left of the enemy
                 bullet_x = enemy_x - bullet_width
                 bullet_y = enemy_y + enemy.get_height() // 2 - bullet_height // 2
                 enemy_bullets.append((bullet_x, bullet_y))
-            last_enemy_bullet_time = current_time
+
+                # Update the shooting timer and set a new random cooldown
+                enemy_shoot_timers[idx]["last_shot"] = current_time
+                enemy_shoot_timers[idx]["cooldown"] = random.randint(500, 1500)
 
         # Update enemy bullet positions
         enemy_bullets = [(x - enemy_bullet_speed, y) for x, y in enemy_bullets if x > -bullet_width]
@@ -156,21 +177,35 @@ def play_game(SCREEN):
         for bullet_x, bullet_y in bullets:
             for i, (enemy_x, enemy_y, enemy) in enumerate(enemies):
                 if (
-                    bullet_x < enemy_x + enemy.get_width() and
-                    bullet_x + bullet_width > enemy_x and
-                    bullet_y < enemy_y + enemy.get_height() and
-                    bullet_y + bullet_height > enemy_y
+                    bullet_x < enemy_x + enemy.get_width()
+                    and bullet_x + bullet_width > enemy_x
+                    and bullet_y < enemy_y + enemy.get_height()
+                    and bullet_y + bullet_height > enemy_y
                 ):
                     bullets_to_remove.append((bullet_x, bullet_y))
                     enemies_to_remove.append(i)
-                    score += 10  # Add 10 points for each destroyed enemy
-                    expsound = pygame.mixer.Sound('./assets/sounds/explosion-sound.mp3')
-                    expsound.play()
+                    score += 1  # Add 10 points for each destroyed enemy
 
-        # Remove collided bullets and enemies
+                    explosions.append({
+                        "x": enemy_x,
+                        "y": enemy_y,
+                        "time": pygame.time.get_ticks()
+                    })
+
+                    explosion_sound.play()
+
+        # Display explosions and remove them after 400ms
+        current_time = pygame.time.get_ticks()
+        for explosion in explosions[:]:
+            if current_time - explosion["time"] > 400:  # Show for 400ms
+                explosions.remove(explosion)
+            else:
+                SCREEN.blit(explosion_image, (explosion["x"], explosion["y"]))
+
+        # Remove collided bullets and enemies/enemies timers
         bullets = [b for b in bullets if b not in bullets_to_remove]
         enemies = [e for i, e in enumerate(enemies) if i not in enemies_to_remove]
-
+        enemy_shoot_timers = {i: timer for i, timer in enemy_shoot_timers.items() if i < len(enemies)}
 
         # Check collisions between enemy bullets and the player
         for bullet_x, bullet_y in enemy_bullets:
@@ -180,9 +215,10 @@ def play_game(SCREEN):
                 bullet_y < player_y + player_height and
                 bullet_y + bullet_height > player_y
             ):
-                player_health -= 10  # Reduce player health
+                player_health -= 5  # Reduce player health
                 enemy_bullets.remove((bullet_x, bullet_y))  # Remove the bullet
-            # Check if player's health is 0 or below
+
+                # Check if player's health is 0 or below
                 if (player_health <= 0):
                     game_over(SCREEN) 
 
