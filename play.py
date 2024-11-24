@@ -1,19 +1,20 @@
+import sys
 import pygame
 import random
 from gameover import game_over
 from components.button import Button
-from shared.helpers import get_font, get_random_enemy
+from shared.helpers import get_font, get_random_enemy, resource_path
 
 def play_game(SCREEN):
 
     pygame.mixer.init()
 
-    pygame.mixer.music.load('./assets/sounds/bg.mp3')
+    pygame.mixer.music.load(resource_path("./assets/sounds/bg.mp3"))
 
     pygame.mixer.music.play(loops=-1, start=0.0)
     pygame.mixer.music.set_volume(0.5)
 
-    tfsound = pygame.mixer.Sound('./assets/sounds/tie-fighter.mp3')
+    tfsound = pygame.mixer.Sound(resource_path("./assets/sounds/tie-fighter.mp3"))
 
     pygame.display.set_caption("Space Wars")
 
@@ -21,7 +22,7 @@ def play_game(SCREEN):
     SCREEN.fill((0, 0, 0))
 
     # Load the background screen
-    bg = pygame.image.load("./assets/images/menu-background.png")
+    bg = pygame.image.load(resource_path("./assets/images/menu-background.png"))
     bg_width = bg.get_width()
     bg_height = bg.get_height()
 
@@ -29,7 +30,7 @@ def play_game(SCREEN):
     bg_x = 0
 
     # Load the player image
-    player = pygame.transform.scale(pygame.image.load("./assets/images/player.png").convert_alpha(), (75, 75))
+    player = pygame.transform.scale(pygame.image.load(resource_path("./assets/images/player.png")).convert_alpha(), (75, 75))
     player_width = player.get_width()
     player_height = player.get_height()
 
@@ -38,13 +39,13 @@ def play_game(SCREEN):
     player_y = SCREEN.get_height() // 2 - player_height // 2
 
     # Load explosion image and sound
-    explosion_image = pygame.transform.scale(pygame.image.load("./assets/images/explosion.png").convert_alpha(), (75, 75))
-    explosion_sound = pygame.mixer.Sound("./assets/sounds/explosion-sound.mp3")
+    explosion_image = pygame.transform.scale(pygame.image.load(resource_path("./assets/images/explosion.png")).convert_alpha(), (75, 75))
+    explosion_sound = pygame.mixer.Sound(resource_path("./assets/sounds/explosion-sound.mp3"))
     explosions = []
 
     # Load bullet image
-    bullet_red = pygame.image.load("./assets/images/red_laser.png").convert_alpha()
-    bullet_green = pygame.image.load("./assets/images/green_laser.png").convert_alpha()
+    bullet_red = pygame.image.load(resource_path("./assets/images/red_laser.png")).convert_alpha()
+    bullet_green = pygame.image.load(resource_path("./assets/images/green_laser.png")).convert_alpha()
     bullet_width = bullet_red.get_width()
     bullet_width = bullet_green.get_width()
     bullet_height = bullet_red.get_height()
@@ -85,6 +86,7 @@ def play_game(SCREEN):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+                sys.exit()
 
         # Update background position
         bg_x -= background_speed
@@ -114,11 +116,11 @@ def play_game(SCREEN):
         player_x = max(0, min(SCREEN.get_width() - player_width, player_x))
         player_y = max(0, min(SCREEN.get_height() - player_height, player_y))
             
-        sound1 = pygame.mixer.Sound('./assets/sounds/shot1.mp3')
+        sound1 = pygame.mixer.Sound(resource_path("./assets/sounds/shot1.mp3"))
         sound1.set_volume(0.3)
-        sound2 = pygame.mixer.Sound('./assets/sounds/shot2.mp3')
+        sound2 = pygame.mixer.Sound(resource_path("./assets/sounds/shot2.mp3"))
         sound2.set_volume(0.3)
-        sound3 = pygame.mixer.Sound('./assets/sounds/shot3.mp3')
+        sound3 = pygame.mixer.Sound(resource_path("./assets/sounds/shot3.mp3"))
         sound3.set_volume(0.3)
 
         # Check for continuous shooting with cooldown
@@ -194,10 +196,10 @@ def play_game(SCREEN):
 
                     explosion_sound.play()
 
-        # Display explosions and remove them after 400ms
+        # Display explosions and remove them after 300ms
         current_time = pygame.time.get_ticks()
         for explosion in explosions[:]:
-            if current_time - explosion["time"] > 400:  # Show for 400ms
+            if current_time - explosion["time"] > 300:  # Show for 300ms
                 explosions.remove(explosion)
             else:
                 SCREEN.blit(explosion_image, (explosion["x"], explosion["y"]))

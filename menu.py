@@ -1,13 +1,14 @@
+import sys
 import pygame
 from play import play_game
 from components.button import Button
-from shared.helpers import get_font
+from shared.helpers import get_font, resource_path
 
 def main_menu(SCREEN):
 
     pygame.mixer.init()
 
-    pygame.mixer.music.load('./assets/sounds/cantina-band.mp3')
+    pygame.mixer.music.load(resource_path("./assets/sounds/cantina-band.mp3"))
 
     pygame.mixer.music.play(loops=-1, start=0.0)
     pygame.mixer.music.set_volume(0.5)
@@ -15,8 +16,8 @@ def main_menu(SCREEN):
     pygame.display.set_caption("Main Menu")
 
     # define background screen
-    bg = pygame.image.load("./assets/images/menu-background.png")
-    logo = pygame.image.load("./assets/images/logo.png")
+    bg = pygame.image.load(resource_path("./assets/images/menu-background.png"))
+    logo = pygame.image.load(resource_path("./assets/images/logo.png"))
     logo_rect = logo.get_rect()
     logo_rect.center = (SCREEN.get_rect().centerx, 200)
 
@@ -46,10 +47,12 @@ def main_menu(SCREEN):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+                sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
                     play_game(SCREEN)
                 if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                     pygame.quit()
+                    sys.exit()
 
         pygame.display.update()

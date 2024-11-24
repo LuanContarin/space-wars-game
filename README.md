@@ -8,6 +8,11 @@
 # 📥Installation
 To play **Space Wars**, follow these steps:
 
+### Using executable
+1. Download `space-wars.zip` at the `releases` tab and extract it.
+1. Run `Space-Wars.exe`.
+
+### Using python directly
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/LuanContarin/space-wars-game.git
