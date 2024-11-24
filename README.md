@@ -9,7 +9,7 @@
 To play **Space Wars**, follow these steps:
 
 ### Using executable
-1. Download `space-wars.zip` from the `releases` tab and extract it.
+1. Download `space-wars.zip` from the `Releases` tab and extract it.
 1. Run `Space-Wars.exe`.
 
 ### Using python directly
